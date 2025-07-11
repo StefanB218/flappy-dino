@@ -1,14 +1,14 @@
 import { Scene } from 'phaser';
 import { Player } from '../entities/Player';
 import { Pipe } from '../entities/Pipe';
+import { EVENTS } from '../utils/globals';
 
 export class Game extends Scene {
   camera: Phaser.Cameras.Scene2D.Camera;
   background: Phaser.GameObjects.Image;
   msg_text: Phaser.GameObjects.Text;
   player: Player;
-  pipes: Pipe
-
+  pipes: Pipe;
 
   // Game state
   score: number = 0;
@@ -29,59 +29,61 @@ export class Game extends Scene {
     this.background = this.add.image(512, 384, 'background');
     this.background.setAlpha(0.5);
 
-    this.player = new Player(this, 0, 0);
-    // Create pipe group
+    const playerStartX = this.scale.width * 0.1; // 10% of the screen width
+    const playerStartY = this.scale.height / 2; // Center vertically
+    this.player = new Player(this, playerStartX, playerStartY);
     this.pipes = new Pipe(this);
 
     this.physics.add.collider(this.player, this.pipes, this.gameEnd, undefined, this);
 
-    this.input.once('pointerdown', () => {
-      this.scene.start('GameOver');
+    const groundHeight = 1;
+    const ground = this.add.rectangle(
+      this.scale.width / 2,
+      this.scale.height - groundHeight / 2,
+      this.scale.width,
+      groundHeight,
+      0x00ff0
+    );
+    this.physics.add.existing(ground, true);
+    this.physics.add.collider(this.player, ground);
+
+    this.pipeRowSpawner(); // soawn once without delay
+    this.pipeTimer = this.time.addEvent({
+      delay: 2000,
+      callback: this.pipeRowSpawner,
+      callbackScope: this,
+      loop: true,
     });
 
-    // Timer to create pipes
-    this.pipeTimer = this.time.addEvent({
-      delay: 1500,
-      callback: this.addPipes,
-      callbackScope: this,
-      loop: true
-    });
+    this.eventListener()
   }
 
-  addPipes() {
-    if (this.gameOver) return;
+  pipeRowSpawner() {
+    const gapHeight = 225;
+    const startX = this.scale.width;
+    const gapY = Math.random() * (this.scale.height - gapHeight) + gapHeight / 2;
 
-    // Create a random gap position
-    const gapY = Phaser.Math.Between(150, this.cameras.main.height - 150);
+    this.pipes.createPipes(startX, gapY, gapHeight, this.player);
+  }
 
-    // Create the pipe pair
-    const pipes = this.pipes.createPipes(
-      this.cameras.main.width + 100,
-      gapY,
-      180 // Gap height
-    );
+  update() {
+    if (this.player && this.player.isAlive) {
+      this.player.update();
+      this.movePipesLeft();
+    } else {
+      this.gameEnd();
+    }
+  }
 
-    // Create a score zone between the pipes
-    const scoreZone = this.physics.add.sprite(
-      pipes.topPipe.x + 50,
-      gapY,
-      "pipe"
-    );
-    scoreZone.setSize(10, 180);
-    scoreZone.setVisible(false);
-    scoreZone.setVelocityX(-200);
-
-    // Add overlap with score zone
-    this.physics.add.overlap(this.player, scoreZone, () => {
-      this.increaseScore();
-      scoreZone.destroy();
-    }, undefined, this);
-
-    // Set a timer to destroy pipes when off-screen
-    this.time.delayedCall(6000, () => {
-      if (pipes.topPipe.active) pipes.topPipe.destroy();
-      if (pipes.bottomPipe.active) pipes.bottomPipe.destroy();
-      if (scoreZone.active) scoreZone.destroy();
+  private movePipesLeft() {
+    this.pipes.getChildren().forEach(pipe => {
+      const sprite = pipe as Phaser.Physics.Arcade.Sprite;
+      if (sprite) {
+        sprite.x -= 2;
+        if (sprite.x < -sprite.width) {
+          sprite.destroy();
+        }
+      }
     });
   }
 
@@ -91,5 +93,16 @@ export class Game extends Scene {
   }
 
   gameEnd() {
+    this.gameOver = true;
+    this.player.die(); // Call the player's die method
+    this.time.delayedCall(1000, () => {
+      this.scene.start('GameOver'); // Transition to the GameOver scene
+    });
+  }
+
+  private eventListener() {
+    this.events.on(EVENTS.PLAYER_PASSED_ZONE, () => {
+      console.log("amogus")
+    })
   }
 }

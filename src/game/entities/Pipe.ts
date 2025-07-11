@@ -1,48 +1,49 @@
-import Phaser from "phaser";
+import Phaser from 'phaser';
+import { EVENTS } from '../utils/globals';
 
 export class Pipe extends Phaser.Physics.Arcade.Group {
-    constructor(scene: Phaser.Scene) {
-        super(scene.physics.world, scene);
+  constructor(scene: Phaser.Scene) {
+    super(scene.physics.world, scene);
 
-        scene.add.existing(this);
-    }
+    scene.add.existing(this);
+  }
 
-    createPipes(x: number, gapY: number, gapHeight: number = 200) {
-        const topPipe = this.create(
-            x,
-            gapY - gapHeight / 2,
-            'pipe'
-        ) as Phaser.Physics.Arcade.Sprite;
+  createPipes(x: number, gapY: number, gapHeight: number, player: Phaser.Physics.Arcade.Sprite) {
+    const topHeight = gapY - gapHeight / 2;
+    const top = this.create(x, gapY - gapHeight / 2, 'pipe');
+    top.setOrigin(0, 1);
+    top.setImmovable(true);
+    top.setDisplaySize(top.width, topHeight);
+    top.body.collision = true;
+    top.body.allowGravity = false;
 
-        // Creating a top pipe using a rectangle shape
-        if (!topPipe.body) {
-            const topGraphics = this.scene.add.graphics();
-            topGraphics.fillStyle(0x4a8f2f, 1); // Green color
-            topGraphics.fillRect(-40, -400, 80, 400); // Width 80, height 400
+    const bottomHeight = this.scene.scale.height - (gapY - gapHeight / 2);
+    const bottom = this.create(x, gapY + gapHeight / 2, 'pipe');
+    bottom.setOrigin(0, 0);
+    bottom.setImmovable(true);
+    bottom.setDisplaySize(bottom.width, bottomHeight);
+    bottom.body.collision = true;
+    bottom.body.allowGravity = false;
 
-            const topTexture = topGraphics.generateTexture('pipe', 80, 400);
-            topGraphics.destroy();
+    const zone = this.scene.add.zone(
+      x,
+      gapY,
+      1,
+      gapHeight
+    );
 
-            topPipe.setTexture('pipe');
-        }
+    this.scene.physics.world.enable(zone);
+    const zoneBody = zone.body as Phaser.Physics.Arcade.Body;
+    
 
-        topPipe.setOrigin(0.5, 1); // Origin at bottom center
-        topPipe.setImmovable(true);
+    this.add(zone)
+    zoneBody.setAllowGravity(false)
+    zoneBody.setImmovable(true);
+    zoneBody.setCollideWorldBounds(false);
 
-        // Bottom pipe
-        const bottomPipe = this.create(
-            x,
-            gapY + gapHeight / 2,
-            'pipe'
-        ) as Phaser.Physics.Arcade.Sprite;
+    this.scene.physics.add.overlap(player, zone, () => {
+        this.scene.events.emit(EVENTS.PLAYER_PASSED_ZONE, { x, gapY });
+    });
 
-        bottomPipe.setOrigin(0.5, 0); // Origin at top center
-        bottomPipe.setImmovable(true);
-
-        // Move pipes from right to left
-        topPipe.setVelocityX(-200);
-        bottomPipe.setVelocityX(-200);
-
-        return { topPipe, bottomPipe };
-    }
+  }
 }
