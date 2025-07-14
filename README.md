@@ -155,3 +155,11 @@ Created by [Phaser Studio](mailto:support@phaser.io). Powered by coffee, anime, 
 The Phaser logo and characters are &copy; 2011 - 2025 Phaser Studio Inc.
 
 All rights reserved.
+
+## Asset credits
+
+Paralax Background by [slashdashgamesstudio on itch.io](https://slashdashgamesstudio.itch.io/cave-background-assets?download)
+
+Cave1 Ambience not included in Repo got that from [sweetdropsproduction.itch.io](https://sweetdropsproduction.itch.io/cave-ambients-1)
+
+Death sound from [Brackeys' Platformer Bundle](https://brackeysgames.itch.io/brackeys-platformer-bundle)

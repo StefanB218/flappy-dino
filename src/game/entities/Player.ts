@@ -1,12 +1,16 @@
 import Phaser from 'phaser';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
-  private static readonly KEY_FRAMES = 11;
   public isAlive: boolean = true;
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 
+  private FLAP_SFX = 'flapSfx';
+  private DIE_SFX = 'dieSfx';
+  private LAST_FLAP_SOUND_TIME: number = 0;
+  private FLAP_SOUND_COOLDOWN: number = 1000;
+
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 'frame_0');
+    super(scene, x, y, 'player');
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -14,11 +18,18 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setCollideWorldBounds(true);
 
     // collision box
-    this.setScale(0.4);
-    this.body?.setSize(50, 50); // Set width and height of the hitbox
+    this.setScale(0.3);
+    const hitboxWidth = 20;
+    const hitboxHeight = 20;
+    this.body?.setSize(hitboxWidth, hitboxHeight);
 
-    this.setBounce(0.2);
-    this.setGravityY(300);
+    if (this.body) {
+      const offsetX = (this.width - hitboxWidth) / 2;
+      const offsetY = (this.height - hitboxHeight) / 2;
+      this.body.setOffset(offsetX, offsetY);
+    }
+
+    this.flipX = false;
 
     if (!scene.anims.exists('fly')) {
       this.createAnimations();
@@ -30,34 +41,47 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  public createAnimations() {
-    const scene = this.scene;
-    const frameNames = [];
-
-    for (let i = 0; i < Player.KEY_FRAMES; i++) {
-      frameNames.push({ key: `frame_${i}` });
-    }
-
-    scene.anims.create({
+  private createAnimations() {
+    this.scene.anims.create({
       key: 'fly',
-      frames: frameNames,
-      frameRate: 10,
+      frames: this.scene.anims.generateFrameNumbers('player', { start: 0, end: 7 }), // 8 frames
+      frameRate: 7,
       repeat: -1,
+    });
+
+    this.anims.generateFrameNumbers('player', { start: 0, end: 7 }).forEach((frame, index) => {
+      console.log(`Frame ${index}:`, frame);
     });
   }
 
-  public flap() {
+  private flap() {
     if (!this.isAlive) return;
+
+    const currentTime = this.scene.time.now;
+    if (currentTime - this.LAST_FLAP_SOUND_TIME > this.FLAP_SOUND_COOLDOWN) {
+      this.scene.sound.play(this.FLAP_SFX, {
+        loop: false,
+        volume: 0.1,
+        detune: 2,
+      });
+      this.LAST_FLAP_SOUND_TIME = currentTime;
+    }
+
     this.setVelocityY(-200);
   }
 
   public die() {
+    if (!this.isAlive) return;
+
     this.isAlive = false;
+    this.scene.sound.play(this.DIE_SFX, {
+      volume: 0.1,
+    });
     this.setTint(0xff0000);
     this.stop();
   }
 
-  update() {
+  public update() {
     if (!this.isAlive) return;
 
     this.setVelocityX(0);
@@ -68,7 +92,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.setRotation(Math.min(Math.PI / 4, this.body.velocity.y / 600));
     }
 
-    if (this.cursors.space.isDown) {
+    if (
+      this.cursors.space.isDown ||
+      this.cursors.up.isDown ||
+      this.scene.input.activePointer.isDown
+    ) {
       this.flap();
     } else if (this.body && this.body.touching.down) {
       this.die();

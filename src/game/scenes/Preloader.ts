@@ -25,19 +25,32 @@ export class Preloader extends Scene {
   preload() {
     //  Load the assets for the game - Replace with your own assets
     this.load.setPath('assets');
-
     this.load.image('logo', 'logo.png');
 
-    for (let i = 0; i < 11; i++) {
-      this.load.image(`frame_${i}`, `player/frame_${i}.png`);
-    }
+    this.loadPlayerSpritesheet();
+    this.loadParalaxBackground();
+
+    this.load.image('stalagnite-grey', 'stalagnite-grey.png');
+    this.load.audio('caveSfx', 'cave-prod.wav');
+    this.load.audio('flapSfx', 'wing_flap_dino.wav');
+    this.load.audio('dieSfx', 'explosion.wav');
   }
 
   create() {
-    //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
-    //  For example, you can define global animations here, so we can use them in other scenes.
-
-    //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
     this.scene.start('MainMenu');
+  }
+
+  private loadPlayerSpritesheet() {
+    this.load.spritesheet('player', 'player.png', {
+      frameWidth: 512,
+      frameHeight: 256,
+    });
+  }
+
+  private loadParalaxBackground() {
+    for (let i = 1; i < 9; i++) {
+      const name = i + (['3', '6', '8'].includes(i.toString()) ? 'fx' : '');
+      this.load.image(`paralax${i}`, `paralax-bg/${name}.png`);
+    }
   }
 }

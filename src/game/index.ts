@@ -21,7 +21,7 @@ const config: Phaser.Types.Core.GameConfig = {
     default: 'arcade',
     arcade: {
       gravity: { y: 300, x: 0 }, // Apply gravity to the y-axis
-      debug: true, // Set to true to see physics bodies in the game
+      debug: localStorage.getItem('debug') === 'true' || false,
     },
   },
   scene: [Boot, Preloader, MainMenu, MainGame, GameOver],
@@ -29,7 +29,6 @@ const config: Phaser.Types.Core.GameConfig = {
 
 const StartGame = (parent: string) => {
   const game = new Game({ ...config, parent });
-
   // Enable HMR
   if (import.meta.hot) {
     import.meta.hot.accept(() => {
