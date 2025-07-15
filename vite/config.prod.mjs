@@ -17,7 +17,7 @@ const phasermsg = () => {
 };
 
 export default defineConfig({
-  base: './flappy-dino',
+  base: '/flappy-dino/',
   logLevel: 'warning',
   build: {
     rollupOptions: {
