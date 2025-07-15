@@ -67,7 +67,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.LAST_FLAP_SOUND_TIME = currentTime;
     }
 
-    this.setVelocityY(-200);
+    this.setVelocityY(-300);
   }
 
   public die() {

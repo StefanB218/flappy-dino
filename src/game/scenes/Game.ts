@@ -32,10 +32,10 @@ export class Game extends Scene {
 
     this.background = new Background(this);
 
-    const playerStartX = this.scale.width * 0.1; // 10% screen width
+    const playerStartX = this.scale.width * 0.2; // 10% screen width
     const playerStartY = this.scale.height / 2; // center vert
 
-    this.score = new Score(this, 0, 0);
+    this.score = new Score(this);
 
     this.player = new Player(this, playerStartX, playerStartY);
     this.pipes = new Pipe(this);
@@ -46,7 +46,7 @@ export class Game extends Scene {
 
     this.pipeRowSpawner(); // soawn once without delay
     this.pipeTimer = this.time.addEvent({
-      delay: 2200,
+      delay: 2000,
       callback: this.pipeRowSpawner,
       callbackScope: this,
       loop: true,
@@ -54,7 +54,7 @@ export class Game extends Scene {
   }
 
   pipeRowSpawner() {
-    const gapHeight = 225;
+    const gapHeight = 250;
     const startX = this.scale.width;
     const gapY = Math.random() * (this.scale.height - gapHeight) + gapHeight / 2;
 

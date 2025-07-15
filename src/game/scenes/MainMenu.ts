@@ -8,14 +8,19 @@ export class MainMenu extends Scene {
   muteButton: GameObjects.Text;
   isMuted: boolean = false;
 
+  MUTE = '🔇 Mute Sound';
+ UNMUTE = '🔈 Unmute Sound';
+
   constructor() {
     super('MainMenu');
   }
 
   create() {
     this.background = new Background(this);
+    const titlePositionX = this.scale.width / 2
+    const titlePositionY = this.scale.height
     this.title = this.add
-      .text(512, 300, 'Flappy Dino', {
+      .text(titlePositionX, titlePositionY * 0.3, 'Flappy Dino', {
         fontFamily: 'Arial Black',
         fontSize: 38,
         color: '#ffffff',
@@ -26,7 +31,7 @@ export class MainMenu extends Scene {
       .setOrigin(0.5);
 
 
-    const startButton = this.add.text(512, 400, 'Click here to Start Game', {
+    const startButton = this.add.text(titlePositionX, titlePositionY * 0.4, 'Click here to Start Game', {
       fontFamily: 'Arial Black',
       fontSize: 32,
       color: '#ffffff',
@@ -46,7 +51,7 @@ export class MainMenu extends Scene {
       startButton.setStyle({ color: '#ffffff' });
     });
 
-    this.muteButton = this.add.text(512, 450, 'Mute Sound', {
+    this.muteButton = this.add.text(titlePositionX, titlePositionY * 0.5, this.MUTE, {
       fontFamily: 'Arial Black',
       fontSize: 26,
       color: '#ffffff',
@@ -79,6 +84,6 @@ export class MainMenu extends Scene {
   private toggleMute() {
     this.isMuted = !this.isMuted;
     this.sound.mute = this.isMuted;350
-    this.muteButton.setText(this.isMuted ? 'Unmute Sound' : 'Mute Sound');
+    this.muteButton.setText(this.isMuted ? this.UNMUTE : this.MUTE);
   }
 }

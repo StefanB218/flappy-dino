@@ -20,7 +20,9 @@ export class GameOver extends Scene {
 
     this.background = new Background(this)
 
-    this.gameover_text = this.add.text(512, 384, 'Game Over', {
+    const textPosX = this.scale.width / 2;
+    const textPosY = this.scale.height;
+    this.gameover_text = this.add.text(textPosX, textPosY * 0.3, 'Game Over', {
       fontFamily: 'Arial Black',
       fontSize: 64,
       color: '#ffffff',
@@ -32,7 +34,7 @@ export class GameOver extends Scene {
     this.gameover_text.setOrigin(0.5);
 
     if (data.score > data.highScore) {
-      this.new_highScore_Text = this.add.text(512, 450, `NEW High Score: ${data.score}`, {
+      this.new_highScore_Text = this.add.text(textPosX, textPosY * 0.45, `NEW High Score: ${data.score}`, {
         fontFamily: 'Arial',
         fontSize: 32,
         color: '#ffffff',
@@ -52,7 +54,7 @@ export class GameOver extends Scene {
         },
       });
     } else {
-      this.score_text = this.add.text(512, 450, `Score: ${data.score}`, {
+      this.score_text = this.add.text(textPosX, textPosY * 0.45, `Score: ${data.score}`, {
         fontFamily: 'Arial',
         fontSize: 32,
         color: '#ffffff',
@@ -61,7 +63,7 @@ export class GameOver extends Scene {
       this.score_text.setOrigin(0.5);
     }
 
-    this.highscore_text = this.add.text(512, 500, `High Score: ${data.highScore}`, {
+    this.highscore_text = this.add.text(textPosX, textPosY * 0.50, `High Score: ${data.highScore}`, {
       fontFamily: 'Arial',
       fontSize: 32,
       color: '#ffffff',

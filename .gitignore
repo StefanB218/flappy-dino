@@ -26,3 +26,4 @@ dist-ssr
 
 ### paid assets
 public/assets/cave-prod.wav
+public/assets/cave-prod.wav.base64
